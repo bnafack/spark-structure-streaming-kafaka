@@ -29,7 +29,7 @@ if __name__ == "__main__":
       data += [(msg.value['DateTime'],msg.value['article'], msg.value['quantite'],msg.value['prix unitaire'])]
       compt += 1
 
-      if compt == 10 : 
+      if compt == 100 : 
         compt = 0
         # PopulateDataBase(msg.value, name_database='vente')
         columns = ["Datetime","article","quantite","prix unitaire"]

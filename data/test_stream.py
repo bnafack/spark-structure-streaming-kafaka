@@ -38,7 +38,7 @@ df = spark \
   .readStream \
   .format("kafka") \
   .option("kafka.bootstrap.servers", "kafka1:19092") \
-  .option("subscribe", "random_names") \
+  .option("subscribe", "registered_user") \
   .option("startingOffsets", "earliest") \
   .load()
 
@@ -55,8 +55,18 @@ schema = StructType([
             StructField("prix unitaire",FloatType(),False)
         ])
 
-df = df.selectExpr("CAST(value AS STRING)").select(from_json(col("value"),schema).alias("data"))
-df.printSchema()
+# df = df.selectExpr("CAST(value AS STRING)").writeStream(from_json(col("value"),schema).alias("data"))
+# df.printSchema()
+
+query = df.selectExpr("CAST(value AS STRING)").select(from_json(col("value"),schema)).alias("data").select("data.*")\
+    .writeStream \
+    .format("console") \
+    .outputMode("append")\
+    .trigger(continuous='1 second')\
+    .option("checkpointLocation", "path/to/HDFS/dir") \
+    .start()
+
+query.awaitTermination()
 
 # df.select("").writeStream.trigger(processingTime="10 seconds").start()
 # df.show(truncate=False)
