@@ -16,6 +16,15 @@ logger = logging.getLogger("spark_structured_streaming")
 import warnings
 warnings.simplefilter("ignore")
 
+# JDBC URL
+jdbc_url = "jdbc:postgresql://postgres:5432/postgres"
+# Connection properties
+connection_properties = {
+    "user": "postgres",
+    "password": "root",
+    "driver": "org.postgresql.Driver"
+}
+
 
 # spark = SparkSession \
 #     .builder \
@@ -27,6 +36,7 @@ try:
                 .builder \
                 .appName("SparkStructuredStreaming") \
                 .config("spark.jars.packages","org.apache.spark:spark-sql-kafka-0-10_2.12:3.0.0") \
+                .config("spark.jars", "/opt/spark-apps/postgresql-42.2.22.jar") \
                 .getOrCreate()
     spark.sparkContext.setLogLevel("ERROR")
     logging.info('Spark session created successfully')
@@ -51,19 +61,37 @@ df = spark \
 schema = StructType([
             StructField("DateTime",StringType(),False),
             StructField("article",StringType(),False),
-            StructField("quantite",IntegerType(),False),
-            StructField("prix unitaire",FloatType(),False)
+            StructField("quantite",StringType(),False),
+            StructField("prix unitaire",StringType(),False)
         ])
 
 # df = df.selectExpr("CAST(value AS STRING)").writeStream(from_json(col("value"),schema).alias("data"))
 # df.printSchema()
 
-query = df.selectExpr("CAST(value AS STRING)").select(from_json(col("value"),schema)).alias("data").select("data.*")\
-    .writeStream \
+# df = df.selectExpr("CAST(value AS STRING)")
+# info_dataframe = df.select(
+#         from_json(col("value"), schema).alias("sample")
+#     )
+
+# info_df_fin = info_dataframe.select("sample.*")
+
+## good##
+# Convert value column to string and then apply schema to parse JSON
+parsed_df = df.selectExpr("CAST(value as STRING) as json") \
+    .select(from_json(col("json"), schema).alias("data")) \
+    .select("data.*")
+
+# Write the parsed DataFrame to console for debugging
+query = parsed_df.writeStream \
+    .outputMode("append") \
     .format("console") \
-    .outputMode("append")\
-    .trigger(continuous='1 second')\
-    .option("checkpointLocation", "path/to/HDFS/dir") \
+    .trigger(processingTime="5 seconds") \
+    .foreachBatch(lambda batch_df, batch_id: batch_df.write.jdbc(
+        url=jdbc_url,
+        table="FLOWTTT",
+        mode="append",
+        properties=connection_properties
+    )) \
     .start()
 
 query.awaitTermination()

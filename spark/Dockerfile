@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y curl vim wget software-properties-commo
 
 RUN update-alternatives --install "/usr/bin/python" "python" "$(which python3)" 1
 RUN python -m pip install --upgrade pip
-RUN pip install pyspark findspark kafka-python kafka-python
+RUN pip install pyspark findspark kafka-python kafka-python psycopg2-binary
 #by removing findspark, we may get error
 
 # Fix the value of PYTHONHASHSEED
