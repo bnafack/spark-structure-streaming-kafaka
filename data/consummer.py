@@ -6,7 +6,7 @@ findspark.init()
 from ast import literal_eval
 from pyspark.sql import SparkSession
 import sys
-from pyspark.sql.types import StructType,StructField,FloatType,IntegerType,StringType
+from pyspark.sql.types import StructType,StructField,FloatType,IntegerType,StringType,TimestampType
 from pyspark.sql.functions import from_json, col, date_format,to_timestamp
 from pyspark.sql.functions import from_json,col
 from pyspark.sql.functions import date_format
@@ -61,36 +61,29 @@ df = spark \
     Modifies the initial dataframe, and creates the final dataframe.
 """
 
-
 schema = StructType([
-            StructField("DateTime",StringType(),False),
-            StructField("article",StringType(),False),
-            StructField("quantite",StringType(),False),
-            StructField("prix unitaire",StringType(),False)
-        ])
+    StructField("DATETIME", TimestampType(), True),
+    StructField("param1", FloatType(), True),
+    StructField("param2", FloatType(), True),
+    StructField("param3", FloatType(), True),
+    StructField("param4", FloatType(), True),
+    StructField("param5", FloatType(), True),
+    StructField("param6", FloatType(), True),
+    StructField("param7", FloatType(), True),
+    StructField("param8", FloatType(), True),
+    StructField("param9", FloatType(), True)
+])
 
-# df = df.selectExpr("CAST(value AS STRING)").writeStream(from_json(col("value"),schema).alias("data"))
-# df.printSchema()
 
-# df = df.selectExpr("CAST(value AS STRING)")
-# info_dataframe = df.select(
-#         from_json(col("value"), schema).alias("sample")
-#     )
 
-# info_df_fin = info_dataframe.select("sample.*")
 
 ## good##
 # Convert value column to string and then apply schema to parse JSON
-parsed_dfe  = df.selectExpr("CAST(value as STRING) as json") \
+parsed_df  = df.selectExpr("CAST(value as STRING) as json") \
     .select(from_json(col("json"), schema).alias("data")) \
     .select("data.*")
 
-parsed_df = parsed_dfe.select(
-    col("DateTime").cast("string").alias("DateTime"),
-    col("article").cast("string"),
-    col("quantite").cast("integer"),
-    col("`prix unitaire`").cast("float").alias("prix_unitaire")
-)
+
 
 
 
@@ -101,13 +94,10 @@ query = parsed_df.writeStream \
     .trigger(processingTime="1 seconds") \
     .foreachBatch(lambda batch_df, batch_id: batch_df.write.jdbc(
         url=jdbc_url,
-        table="FLOWTTT_DATA",
+        table="DATA_FLOW",
         mode="append",
         properties=connection_properties
     )) \
     .start()
 
 query.awaitTermination()
-
-# df.select("").writeStream.trigger(processingTime="10 seconds").start()
-# df.show(truncate=False)
