@@ -14,6 +14,7 @@ connection_string = f"dbname='{database}' user='{user}' password='{password}' ho
 create_table_sql = '''
 CREATE TABLE DATA_FLOW(
    DATETIME TIMESTAMP WITHOUT TIME ZONE,  
+   MACHINES_IDS CHAR(20),
    PARAM1 FLOAT,
    PARAM2 FLOAT,
    PARAM3 FLOAT,

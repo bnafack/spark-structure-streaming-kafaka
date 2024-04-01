@@ -62,7 +62,8 @@ df = spark \
 """
 
 schema = StructType([
-    StructField("DATETIME", TimestampType(), True),
+    StructField("DATETIME", StringType(), True),
+    StructField("machines_ids", StringType(), True),
     StructField("param1", FloatType(), True),
     StructField("param2", FloatType(), True),
     StructField("param3", FloatType(), True),
@@ -76,13 +77,24 @@ schema = StructType([
 
 
 
-
 ## good##
 # Convert value column to string and then apply schema to parse JSON
 parsed_df  = df.selectExpr("CAST(value as STRING) as json") \
     .select(from_json(col("json"), schema).alias("data")) \
-    .select("data.*")
-
+    .select("data.*")\
+    .select(
+        to_timestamp(col("DATETIME"), "dd/MM/yyyy HH:mm:ss").alias("DATETIME"),
+        "machines_ids",
+        "param1",
+        "param2",
+        "param3",
+        "param4",
+        "param5",
+        "param6",
+        "param7",
+        "param8",
+        "param9"
+    )
 
 
 
