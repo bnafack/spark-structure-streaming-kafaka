@@ -3,21 +3,22 @@ import psycopg2
 
 #Establishing the connection
 conn = psycopg2.connect(
-   database="postgres", user="postgres", password="root", host="postgres", port= "5432"
+   database="dev", user="root", password="root", host="postgres", port= "5432"
 )
 #Creating a cursor object using the cursor() method
 cursor = conn.cursor()
 
-#Doping EMPLOYEE table if already exists.
+#Doping measurement table if already exists.
 cursor.execute("DROP TABLE IF EXISTS EMPLOYEE")
 
 #Creating table as per requirement
-sql ='''CREATE TABLE FLOWTTT(
+sql ='''CREATE TABLE FLOWTTT_DATA(
+   DATETIME TIMESTAMP WITHOUT TIME ZONE,
    ARTICLE CHAR(20) ,
-   QUANTITE CHAR(20),
-   "PRIX UNITAIRE" CHAR(20),
-   DATETIME CHAR(20)
+   QUANTITE INT,
+   PRIX_UNITAIRE FLOAT
 )'''
+
 cursor.execute(sql)
 print("Table created successfully........")
 conn.commit()
