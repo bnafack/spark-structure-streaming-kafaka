@@ -224,6 +224,39 @@ services:
     networks:
       - kafka-network
       - airflow-kafka
+  mysql:
+    image: mysql:5.7
+    container_name: mysql-db
+    restart: always
+    ports:
+      - 3307:3306
+    volumes:
+      - /var/lib/mysql
+      - ./database:/docker-entrypoint-initdb.d
+      - ./mysqlentry/:/home
+    environment:
+      MYSQL_DATABASE: "dev"
+      MYSQL_USER: "superadmin"
+      MYSQL_PASSWORD: "superadmin"
+      MYSQL_ROOT_PASSWORD: "root"
+    networks:
+      - kafka-network
+      - airflow-kafka
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4_container
+    restart: always
+    ports:
+      - "8888:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: bauricenafack@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: superadmin
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - kafka-network
+      - airflow-kafka
+
 networks:
   kafka-network:
     driver: bridge
