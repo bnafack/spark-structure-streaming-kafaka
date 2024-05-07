@@ -1,0 +1,3 @@
+create procedure employees.AddDataA( in birth_date date, in first_name varchar(14), in last_name varchar(16), in gender enum('F','M'), in hire_date date)
+INSERT INTO employees (birth_date, first_name, last_name, gender, hire_date)
+VALUES (birth_date,first_name, last_name,gender,hire_date);
