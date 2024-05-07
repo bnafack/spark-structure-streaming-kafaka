@@ -1,0 +1,5 @@
+db_data/
+data_collection/__pycache__/
+db_collection/data.py:Zone.Identifier
+db_collection/producer.py:Zone.Identifier
+data_collection/*:Zone.Identifier
